@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_to_do_app/util/dialog_box.dart';
 import 'package:flutter_to_do_app/util/todo_tile.dart';
 
 class HomePage extends StatefulWidget {
@@ -9,6 +10,45 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  //text controller
+  final _controller = TextEditingController();
+
+  // List of tot tasks
+  List toDoList = [
+    ["Go Biking", false],
+    ["Prepare Breakfast", false]
+  ];
+
+  // checkbox tapped
+  void checkBoxChanged(bool? value, int index) {
+    setState(() {
+      toDoList[index][1] = !toDoList[index][1];
+    });
+  }
+
+  // Save new task
+  void saveNewTask() {
+    setState(() {
+      toDoList.add([_controller.text, false]);
+      _controller.clear();
+    });
+    Navigator.of(context).pop();
+  }
+
+  // Create New task
+  void creatNewTask() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return DialogBox(
+          controller: _controller,
+          onSave: saveNewTask,
+          onCancel: () => Navigator.of(context).pop(),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,19 +57,19 @@ class _HomePageState extends State<HomePage> {
         title: const Text('TO DO'),
         elevation: 0,
       ),
-      body: ListView(
-        children: [
-          ToDoTile(
-            taskName: "Make Tutorial",
-            taskCompleted: true,
-            onChanged: (p0) {},
-          ),
-          ToDoTile(
-            taskName: "Go Biking",
-            taskCompleted: false,
-            onChanged: (p0) {},
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: creatNewTask,
+        child: Icon(Icons.add),
+      ),
+      body: ListView.builder(
+        itemCount: toDoList.length,
+        itemBuilder: (context, index) {
+          return ToDoTile(
+            taskName: toDoList[index][0],
+            taskCompleted: toDoList[index][1],
+            onChanged: (value) => checkBoxChanged(value, index),
+          );
+        },
       ),
     );
   }
